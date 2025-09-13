@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>거래 시뮬레이터 - 코드내비 암호화폐 플랫폼</title>
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body class="bg-background text-text-primary">
+    <nav class="bg-surface border-b border-border">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 text-primary" viewBox="0 0 32 32" fill="currentColor">
+                        <path d="M16 2L3 7l13 5 13-5-13-5zM3 16l13 5 13-5M3 25l13 5 13-5"/>
+                    </svg>
+                    <h1 class="ml-3 text-xl font-bold text-primary">코드내비 암호화폐 플랫폼</h1>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="homepage.html" class="text-text-secondary hover:text-primary px-3 py-2 rounded-md text-sm transition-colors">홈</a>
+                    <a href="trading_simulator.html" class="text-primary font-medium px-3 py-2 rounded-md text-sm">시뮬레이터</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Trading Interface -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="card">
+                <div class="text-sm text-text-secondary">총 자산</div>
+                <div id="totalBalance" class="text-2xl font-bold font-mono text-text-primary">₩10,000,000</div>
+                <div id="totalChange" class="text-sm text-success">+0.00%</div>
+            </div>
+            <div class="card">
+                <div class="text-sm text-text-secondary">사용 가능 KRW</div>
+                <div id="availableKRW" class="text-xl font-mono text-text-primary">₩10,000,000</div>
+            </div>
+            <div class="card">
+                <div class="text-sm text-text-secondary">보유 코인 가치</div>
+                <div id="coinsValue" class="text-xl font-mono text-text-primary">₩0</div>
+            </div>
+        </div>
+
+        <!-- Trading Interface -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Coin Selection & Chart -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Coin Selector -->
+                <div class="card">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-4">
+                        <button class="coin-selector active" data-coin="BTC">
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mb-1">
+                                <span class="text-orange-600 font-bold text-xs">₿</span>
+                            </div>
+                            <div class="text-xs font-medium">BTC</div>
+                            <div class="text-xs text-text-secondary">₩52,340,000</div>
+                        </button>
+                        <button class="coin-selector" data-coin="ETH">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mb-1">
+                                <span class="text-blue-600 font-bold text-xs">Ξ</span>
+                            </div>
+                            <div class="text-xs font-medium">ETH</div>
+                            <div class="text-xs text-text-secondary">₩3,890,000</div>
+                        </button>
+                        <button class="coin-selector" data-coin="ADA">
+                            <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center mb-1">
+                                <span class="text-blue-700 font-bold text-xs">₳</span>
+                            </div>
+                            <div class="text-xs font-medium">ADA</div>
+                            <div class="text-xs text-text-secondary">₩650</div>
+                        </button>
+                        <button class="coin-selector" data-coin="DOT">
+                            <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mb-1">
+                                <span class="text-pink-600 font-bold text-xs">●</span>
+                            </div>
+                            <div class="text-xs font-medium">DOT</div>
+                            <div class="text-xs text-text-secondary">₩8,900</div>
+                        </button>
+                        <button class="coin-selector" data-coin="LINK">
+                            <div class="w-8 h-8 bg-blue-300 rounded-full flex items-center justify-center mb-1">
+                                <span class="text-blue-800 font-bold text-xs">⬡</span>
+                            </div>
+                            <div class="text-xs font-medium">LINK</div>
+                            <div class="text-xs text-text-secondary">₩23,400</div>
+                        </button>
+                        <button class="coin-selector" data-coin="SOL">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mb-1">
+                                <span class="text-purple-600 font-bold text-xs">◎</span>
+                            </div>
+                            <div class="text-xs font-medium">SOL</div>
+                            <div class="text-xs text-text-secondary">₩234,500</div>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div id="selectedCoinName" class="text-lg font-bold">Bitcoin (BTC)</div>
+                            <div id="selectedCoinPrice" class="text-2xl font-mono font-bold">₩52,340,000</div>
+                        </div>
+                        <div class="text-right">
+                            <div id="selectedCoinChange" class="text-lg font-bold text-success">+2.34%</div>
+                            <div id="selectedCoin24h" class="text-sm text-text-secondary">24h 변동률</div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">가격 차트</h3>
+                        <div class="flex space-x-2">
+                            <button class="chart-timeframe active" data-timeframe="1h"></button>
+                            <button class="chart-timeframe" data-timeframe="4h"></button>
+                            <button class="chart-timeframe" data-timeframe="1d"></button>
+                            <button class="chart-timeframe" data-timeframe="1w"></button>
+                        </div>
+                    </div>
+
+                    
+                    <div class="flex justify-between mb-2" style="padding:0 8px;">
+                        <div style="font-weight:600;">가격</div>
+                        <div style="font-weight:600;">거래량</div>
+                    </div>
+
+                    <div class="h-80">
+                        
+                        <div id="priceChartDiv" style="width:100%; height:100%;"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Trading Panel -->
+            <div class="space-y-6">
+                <!-- Buy/Sell Toggle -->
+                <div class="card">
+                    <div class="flex rounded-lg overflow-hidden mb-4">
+                        <button id="buyTab" class="trade-tab active flex-1 py-3 text-center font-semibold">매수</button>
+                        <button id="sellTab" class="trade-tab flex-1 py-3 text-center font-semibold">매도</button>
+                    </div>
+
+                    <!-- Order Form -->
+                    <div id="orderForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-text-secondary mb-2">주문 타입</label>
+                            <select id="orderType" class="input-field">
+                                <option value="market">시장가</option>
+                                <option value="limit">지정가</option>
+                            </select>
+                        </div>
+
+                        <div id="priceInput" style="display: none;">
+                            <label class="block text-sm text-text-secondary mb-2">가격 (KRW)</label>
+                            <input type="number" id="orderPrice" class="input-field" />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm text-text-secondary mb-2">수량</label>
+                            <input type="number" id="orderAmount" class="input-field" step="0.00000001" />
+                            <div class="flex justify-between mt-2">
+                                <button class="percentage-btn" data-percent="25">25%</button>
+                                <button class="percentage-btn" data-percent="50">50%</button>
+                                <button class="percentage-btn" data-percent="75">75%</button>
+                                <button class="percentage-btn" data-percent="100">100%</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-surface-secondary p-3 rounded-lg">
+                            <div class="flex justify-between text-sm">
+                                <span>예상 금액:</span>
+                                <span id="estimatedTotal" class="font-mono">₩0</span>
+                            </div>
+                        </div>
+
+                        <button id="executeOrder" class="btn-primary w-full py-3 text-lg font-semibold">
+                            매수 주문
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-4">거래 정보</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>보유 수량:</span>
+                            <span id="heldAmount" class="font-mono">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>평균 매수가:</span>
+                            <span id="avgBuyPrice" class="font-mono">₩0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>평가손익:</span>
+                            <span id="unrealizedPnL" class="font-mono">₩0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portfolio Holdings -->
+        <div class="card mt-6">
+            <h3 class="text-lg font-semibold mb-4">보유 자산</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="border-b border-border">
+                        <tr class="text-left">
+                            <th class="pb-3 text-sm font-medium text-text-secondary">코인</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">보유수량</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">현재가</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">평균매수가</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">평가금액</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">수익률</th>
+                        </tr>
+                    </thead>
+                    <tbody id="holdingsTable">
+                        <!-- Holdings will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Trading History -->
+        <div class="card mt-6">
+            <h3 class="text-lg font-semibold mb-4">거래 내역</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="border-b border-border">
+                        <tr class="text-left">
+                            <th class="pb-3 text-sm font-medium text-text-secondary">시간</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">코인</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">타입</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">수량</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">가격</th>
+                            <th class="pb-3 text-sm font-medium text-text-secondary">총액</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable">
+                        <!-- History will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .coin-selector {
+            @apply bg-surface border border-border rounded-lg p-3 text-center transition-all hover:bg-surface-secondary;
+        }
+        .coin-selector.active {
+            @apply bg-primary-50 border-primary text-primary;
+        }
+        .chart-timeframe {
+            @apply px-3 py-1 text-sm rounded border border-border bg-surface transition-colors;
+        }
+        .chart-timeframe.active {
+            @apply bg-primary text-white border-primary;
+        }
+        .trade-tab {
+            @apply bg-surface-secondary transition-colors;
+        }
+        .trade-tab.active {
+            @apply bg-success text-white;
+        }
+        .trade-tab.sell-active {
+            @apply bg-accent text-white;
+        }
+        .percentage-btn {
+            @apply px-2 py-1 text-xs bg-surface-secondary rounded border border-border hover:bg-surface transition-colors;
+        }
+    </style>
+
+    <script>
+        // 한글 단위 포맷 함수 (원화용)
+        function formatKRW(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-';
+            const v = Math.abs(value);
+            const sign = value < 0 ? '-' : '';
+            if (v >= 100000000) {
+                return sign + (v / 100000000).toFixed(2).replace(/\.00$/, '') + '억';
+            } else if (v >= 10000) {
+                return sign + (v / 10000).toFixed(2).replace(/\.00$/, '') + '만';
+            } else {
+                return sign + '₩' + Math.round(v).toLocaleString('ko-KR');
+            }
+        }
+        function formatKRWFull(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-';
+            return '₩' + Math.round(value).toLocaleString('ko-KR');
+        }
+
+        class TradingSimulator {
+            constructor() {
+                this.balance = { KRW: 10000000 };
+                this.holdings = {};
+                this.tradeHistory = [];
+                this.currentCoin = 'BTC';
+                this.isTradeTypeBuy = true;
+                this.chartInitialized = false;
+
+                this.coins = {
+                    BTC: { name: 'Bitcoin', price: 52340000, change: 2.34, symbol: '₿', cgId: 'bitcoin' },
+                    ETH: { name: 'Ethereum', price: 3890000, change: -1.23, symbol: 'Ξ', cgId: 'ethereum' },
+                    ADA: { name: 'Cardano', price: 650, change: 3.45, symbol: '₳', cgId: 'cardano' },
+                    DOT: { name: 'Polkadot', price: 8900, change: -0.87, symbol: '●', cgId: 'polkadot' },
+                    LINK: { name: 'Chainlink', price: 23400, change: 5.67, symbol: '⬡', cgId: 'chainlink' },
+                    SOL: { name: 'Solana', price: 234500, change: 4.32, symbol: '◎', cgId: 'solana' }
+                };
+
+                this.loadData();
+                this.initializeChart();
+                this.initializeUI();
+                this.setupEventListeners();
+                this.startPriceUpdates();
+                this.updateDisplay();
+            }
+
+            loadData() {
+                const saved = localStorage.getItem('cryptoSimData');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.balance = data.balance || this.balance;
+                    this.holdings = data.holdings || {};
+                    this.tradeHistory = data.tradeHistory || [];
+                }
+            }
+            saveData() {
+                localStorage.setItem('cryptoSimData', JSON.stringify({
+                    balance: this.balance,
+                    holdings: this.holdings,
+                    tradeHistory: this.tradeHistory
+                }));
+            }
+
+            initializeUI() {
+                this.selectCoin('BTC');
+            }
+
+            setupEventListeners() {
+                document.querySelectorAll('.coin-selector').forEach(btn => {
+                    btn.addEventListener('click', () => this.selectCoin(btn.dataset.coin));
+                });
+                document.getElementById('buyTab').addEventListener('click', () => this.setTradeType(true));
+                document.getElementById('sellTab').addEventListener('click', () => this.setTradeType(false));
+                document.getElementById('orderType').addEventListener('change', (e) => {
+                    const priceInput = document.getElementById('priceInput');
+                    if (e.target.value === 'limit') {
+                        priceInput.style.display = 'block';
+                        document.getElementById('orderPrice').value = this.coins[this.currentCoin].price;
+                    } else priceInput.style.display = 'none';
+                    this.updateEstimatedTotal();
+                });
+                document.getElementById('orderAmount').addEventListener('input', () => this.updateEstimatedTotal());
+                document.getElementById('orderPrice').addEventListener('input', () => this.updateEstimatedTotal());
+                document.querySelectorAll('.percentage-btn').forEach(btn => btn.addEventListener('click', () => this.setPercentage(parseInt(btn.dataset.percent))));
+                document.getElementById('executeOrder').addEventListener('click', () => this.executeOrder());
+                document.querySelectorAll('.chart-timeframe').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.chart-timeframe').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.updateChart(btn.dataset.timeframe);
+                    });
+                });
+            }
+
+            selectCoin(coin) {
+                this.currentCoin = coin;
+                document.querySelectorAll('.coin-selector').forEach(btn => btn.classList.remove('active'));
+                const selectorBtn = document.querySelector(`[data-coin="${coin}"]`);
+                if (selectorBtn) selectorBtn.classList.add('active');
+
+                const coinData = this.coins[coin];
+                document.getElementById('selectedCoinName').textContent = `${coinData.name} (${coin})`;
+                document.getElementById('selectedCoinPrice').textContent = formatKRWFull(coinData.price);
+                const changeEl = document.getElementById('selectedCoinChange');
+                changeEl.textContent = `${coinData.change >= 0 ? '+' : ''}${coinData.change.toFixed(2)}%`;
+                changeEl.className = `text-lg font-bold ${coinData.change >= 0 ? 'text-success' : 'text-accent'}`;
+
+                this.updateTradingInfo();
+                this.load24hChartForCurrentCoin();
+                this.updateEstimatedTotal();
+            }
+
+            setTradeType(isBuy) {
+                this.isTradeTypeBuy = isBuy;
+                const buyTab = document.getElementById('buyTab');
+                const sellTab = document.getElementById('sellTab');
+                const executeBtn = document.getElementById('executeOrder');
+                if (isBuy) {
+                    buyTab.classList.add('active'); buyTab.classList.remove('sell-active');
+                    sellTab.classList.remove('active', 'sell-active');
+                    executeBtn.textContent = '매수 주문';
+                    executeBtn.className = 'bg-accent text-white w-full py-3 text-lg font-semibold rounded-lg hover:bg-accent-700 transition-colors';
+                } else {
+                    sellTab.classList.add('active', 'sell-active'); buyTab.classList.remove('active');
+                    executeBtn.textContent = '매도 주문';
+                    executeBtn.className = 'btn-primary w-full py-3 text-lg font-semibold';
+                }
+                this.updateEstimatedTotal();
+            }
+
+            setPercentage(percent) {
+                const amountInput = document.getElementById('orderAmount');
+                if (this.isTradeTypeBuy) {
+                    const price = this.getOrderPrice();
+                    const maxAmount = (this.balance.KRW * percent / 100) / price;
+                    amountInput.value = maxAmount.toFixed(8);
+                } else {
+                    const held = this.holdings[this.currentCoin] || 0;
+                    amountInput.value = (held * percent / 100).toFixed(8);
+                }
+                this.updateEstimatedTotal();
+            }
+
+            getOrderPrice() {
+                const orderType = document.getElementById('orderType').value;
+                if (orderType === 'market') return this.coins[this.currentCoin].price;
+                return parseFloat(document.getElementById('orderPrice').value) || this.coins[this.currentCoin].price;
+            }
+
+            updateEstimatedTotal() {
+                const amount = parseFloat(document.getElementById('orderAmount').value) || 0;
+                const price = this.getOrderPrice();
+                const total = amount * price;
+                document.getElementById('estimatedTotal').textContent = `₩${Math.round(total).toLocaleString('ko-KR')}`;
+            }
+
+            updateTradingInfo() {
+                const held = this.holdings[this.currentCoin] || 0;
+                document.getElementById('heldAmount').textContent = held.toFixed(8);
+
+                const trades = this.tradeHistory.filter(t => t.coin === this.currentCoin && t.type === 'buy');
+                let avgPrice = 0;
+                if (trades.length > 0) {
+                    const totalCost = trades.reduce((s, t) => s + (t.amount * t.price), 0);
+                    const totalAmount = trades.reduce((s, t) => s + t.amount, 0);
+                    avgPrice = totalAmount > 0 ? totalCost / totalAmount : 0;
+                }
+                document.getElementById('avgBuyPrice').textContent = `₩${Math.round(avgPrice).toLocaleString('ko-KR')}`;
+
+                const currentPrice = this.coins[this.currentCoin].price;
+                const unrealizedPnL = held * (currentPrice - avgPrice);
+                const pnlEl = document.getElementById('unrealizedPnL');
+                pnlEl.textContent = `₩${Math.round(unrealizedPnL).toLocaleString('ko-KR')}`;
+                pnlEl.className = `font-mono ${unrealizedPnL >= 0 ? 'text-success' : 'text-accent'}`;
+            }
+
+            executeOrder() {
+                const amount = parseFloat(document.getElementById('orderAmount').value);
+                const price = this.getOrderPrice();
+                const total = amount * price;
+
+                if (!amount || amount <= 0 || !Number.isInteger(amount)) {
+                    alert('수량은 1 이상의 정수만 입력 가능합니다.');
+                    return;
+                }
+
+                if (this.isTradeTypeBuy) {
+                    if (total > this.balance.KRW) { alert('잔고가 부족합니다.'); return; }
+                    this.balance.KRW -= total;
+                    this.holdings[this.currentCoin] = (this.holdings[this.currentCoin] || 0) + amount;
+                    this.tradeHistory.unshift({ timestamp: new Date().toISOString(), coin: this.currentCoin, type: 'buy', amount, price, total });
+                } else {
+                    const held = this.holdings[this.currentCoin] || 0;
+                    if (amount > held) { alert('보유 수량이 부족합니다.'); return; }
+                    this.balance.KRW += total;
+                    this.holdings[this.currentCoin] = held - amount;
+                    if (this.holdings[this.currentCoin] <= 0.00000001) delete this.holdings[this.currentCoin];
+                    this.tradeHistory.unshift({ timestamp: new Date().toISOString(), coin: this.currentCoin, type: 'sell', amount, price, total });
+                }
+
+                document.getElementById('orderAmount').value = '';
+                if (document.getElementById('orderType').value === 'limit') document.getElementById('orderPrice').value = this.coins[this.currentCoin].price;
+
+                this.saveData();
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                document.getElementById('availableKRW').textContent = `₩${Math.round(this.balance.KRW).toLocaleString('ko-KR')}`;
+                let coinsValue = 0;
+                for (const [coin, amount] of Object.entries(this.holdings)) coinsValue += amount * this.coins[coin].price;
+                document.getElementById('coinsValue').textContent = `₩${Math.round(coinsValue).toLocaleString('ko-KR')}`;
+
+                const totalBalance = this.balance.KRW + coinsValue;
+                document.getElementById('totalBalance').textContent = `₩${Math.round(totalBalance).toLocaleString('ko-KR')}`;
+
+                const totalChange = ((totalBalance - 10000000) / 10000000 * 100);
+                document.getElementById('totalChange').textContent = `${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(2)}%`;
+                document.getElementById('totalChange').className = `text-sm ${totalChange >= 0 ? 'text-success' : 'text-accent'}`;
+
+                this.updateTradingInfo();
+                this.updateHoldingsTable();
+                this.updateHistoryTable();
+            }
+
+            updateHoldingsTable() {
+                const tbody = document.getElementById('holdingsTable');
+                tbody.innerHTML = '';
+                for (const [coin, amount] of Object.entries(this.holdings)) {
+                    if (amount <= 0.00000001) continue;
+                    const coinData = this.coins[coin];
+                    const currentValue = amount * coinData.price;
+                    const buyTrades = this.tradeHistory.filter(t => t.coin === coin && t.type === 'buy');
+                    let avgPrice = 0;
+                    if (buyTrades.length > 0) {
+                        const totalCost = buyTrades.reduce((s, t) => s + (t.amount * t.price), 0);
+                        const totalAmount = buyTrades.reduce((s, t) => s + t.amount, 0);
+                        avgPrice = totalCost / totalAmount;
+                    }
+                    const profitRate = avgPrice > 0 ? ((coinData.price - avgPrice) / avgPrice * 100) : 0;
+
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-border';
+                    row.innerHTML = `
+                        <td class="py-3">
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 rounded-full flex items-center justify-center mr-2">
+                                    <span class="font-bold text-xs">${coinData.symbol}</span>
+                                </div>
+                                <span class="font-medium">${coin}</span>
+                            </div>
+                        </td>
+                        <td class="py-3 font-mono">${amount.toFixed(8)}</td>
+                        <td class="py-3 font-mono">₩${Math.round(coinData.price).toLocaleString('ko-KR')}</td>
+                        <td class="py-3 font-mono">₩${Math.round(avgPrice).toLocaleString('ko-KR')}</td>
+                        <td class="py-3 font-mono">₩${Math.round(currentValue).toLocaleString('ko-KR')}</td>
+                        <td class="py-3 font-mono ${profitRate >= 0 ? 'text-success' : 'text-accent'}">${profitRate >= 0 ? '+' : ''}${profitRate.toFixed(2)}%</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+                if (Object.keys(this.holdings).length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="6" class="py-8 text-center text-text-secondary">보유 자산이 없습니다</td>';
+                    tbody.appendChild(row);
+                }
+            }
+
+            updateHistoryTable() {
+                const tbody = document.getElementById('historyTable');
+                tbody.innerHTML = '';
+                const recentTrades = this.tradeHistory.slice(0, 10);
+                for (const trade of recentTrades) {
+                    const coinData = this.coins[trade.coin];
+                    const date = new Date(trade.timestamp);
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-border';
+                    row.innerHTML = `
+                        <td class="py-3 text-sm">${date.toLocaleString('ko-KR')}</td>
+                        <td class="py-3">
+                            <div class="flex items-center">
+                                <div class="w-5 h-5 rounded-full flex items-center justify-center mr-2">
+                                    <span class="font-bold text-xs">${coinData.symbol}</span>
+                                </div>
+                                <span class="font-medium">${trade.coin}</span>
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <span class="px-2 py-1 text-xs rounded ${trade.type === 'buy' ? 'bg-success-100 text-success' : 'bg-accent-100 text-accent'}">
+                                ${trade.type === 'buy' ? '매수' : '매도'}
+                            </span>
+                        </td>
+                        <td class="py-3 font-mono">${trade.amount.toFixed(8)}</td>
+                        <td class="py-3 font-mono">₩${Math.round(trade.price).toLocaleString('ko-KR')}</td>
+                        <td class="py-3 font-mono">₩${Math.round(trade.total).toLocaleString('ko-KR')}</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+                if (this.tradeHistory.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="6" class="py-8 text-center text-text-secondary">거래 내역이 없습니다</td>';
+                    tbody.appendChild(row);
+                }
+            }
+
+            // 차트 초기화 (캔들용)
+            initializeChart() {
+                const priceDiv = document.getElementById('priceChartDiv');
+                Plotly.newPlot(priceDiv, [], {
+                    margin: { t: 25, b: 40 },
+                    plot_bgcolor: null,
+                    paper_bgcolor: null
+                }, {displayModeBar: false});
+                this.chartInitialized = true;
+            }
+
+            
+            async load24hChartForCurrentCoin() {
+                try {
+                    const coinObj = this.coins[this.currentCoin];
+                    if (!coinObj) return;
+                    const cgId = coinObj.cgId;
+                    const url = `https://api.coingecko.com/api/v3/coins/${encodeURIComponent(cgId)}/market_chart?vs_currency=krw&days=1`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('CoinGecko API 에러');
+                    const json = await res.json();
+
+                    const pricesRaw = json.prices || []; // [ [ts, price], ... ]
+
+                    
+                    const targetPoints = 60;
+                    const bucketSize = Math.max(1, Math.floor(pricesRaw.length / targetPoints));
+
+                    const ohlc = { x: [], open: [], high: [], low: [], close: [] };
+
+                    for (let i = 0; i < pricesRaw.length; i += bucketSize) {
+                        const slice = pricesRaw.slice(i, i + bucketSize);
+                        if (slice.length === 0) continue;
+                        const times = slice.map(s => s[0]);
+                        const vals = slice.map(s => s[1]);
+                        ohlc.x.push(new Date(times[0]));
+                        ohlc.open.push(vals[0]);
+                        ohlc.high.push(Math.max(...vals));
+                        ohlc.low.push(Math.min(...vals));
+                        ohlc.close.push(vals[vals.length - 1]);
+                    }
+
+                   
+                    const candleTrace = {
+                        x: ohlc.x,
+                        open: ohlc.open,
+                        high: ohlc.high,
+                        low: ohlc.low,
+                        close: ohlc.close,
+                        type: 'candlestick',
+                        name: `${coinObj.name} (KRW)`,
+                        increasing: { line: { color: '#0f9d58' } },
+                        decreasing: { line: { color: '#db4437' } },
+                        hoverinfo: 'skip',
+                        hovertemplate: ''
+                    };
+
+                    // y축 눈금 텍스트 한글 단위로 표시
+                    const priceMin = Math.min(...ohlc.low.filter(v => v != null));
+                    const priceMax = Math.max(...ohlc.high.filter(v => v != null));
+                    const createTickText = (minV, maxV, steps = 5) => {
+                        const vals = [];
+                        const texts = [];
+                        for (let i = 0; i < steps; i++) {
+                            const v = minV + (maxV - minV) * (i / (steps - 1));
+                            vals.push(Math.round(v));
+                            texts.push(formatKRW(v));
+                        }
+                        return { vals, texts };
+                    };
+                    const ticks = createTickText(priceMin, priceMax, 5);
+
+                    const priceLayout = {
+                        title: `${coinObj.name} — 24시간 변동 (KRW)`,
+                        xaxis: { rangeslider: { visible: false }, showticklabels: false }, // 날짜(xtick) 숨김
+                        yaxis: {
+                            title: '', // 축 제목 제거(레이블은 위에서 HTML로 가로 표시)
+                            tickvals: ticks.vals,
+                            ticktext: ticks.texts,
+                            tickfont: { size: 11 }
+                        },
+                        hovermode: false,
+                        showlegend: false,
+                        margin: { t: 40, b: 20 },
+                        plot_bgcolor: null,
+                        paper_bgcolor: null
+                    };
+
+                    const priceDiv = document.getElementById('priceChartDiv');
+                    Plotly.react(priceDiv, [candleTrace], priceLayout, { responsive: true, displayModeBar: false });
+
+                    // 현재가/24h변동 업데이트
+                    if (ohlc.open.length > 0 && ohlc.close.length > 0) {
+                        const firstPrice = ohlc.open[0];
+                        const lastPrice = ohlc.close[ohlc.close.length - 1];
+                        const pctChange = ((lastPrice - firstPrice) / firstPrice) * 100;
+                        coinObj.price = lastPrice;
+                        coinObj.change = pctChange;
+                        document.getElementById('selectedCoinPrice').textContent = formatKRWFull(lastPrice);
+                        const changeEl = document.getElementById('selectedCoinChange');
+                        changeEl.textContent = `${pctChange >= 0 ? '+' : ''}${pctChange.toFixed(2)}%`;
+                        changeEl.className = `text-lg font-bold ${pctChange >= 0 ? 'text-success' : 'text-accent'}`;
+                    }
+
+                    // 선택된 코인 가격 라벨들 갱신
+                    document.querySelectorAll('.coin-selector').forEach(btn => {
+                        const symbol = btn.dataset.coin;
+                        const priceEl = btn.querySelector('.text-xs.text-text-secondary');
+                        if (this.coins[symbol]) {
+                            priceEl.textContent = `${formatKRWFull(Math.round(this.coins[symbol].price))}`;
+                        }
+                    });
+
+                    this.updateDisplay();
+                } catch (err) {
+                    console.error('차트 로드 실패:', err);
+                }
+            }
+
+            updateChart(timeframe) {
+                // 현재 구현은 항상 24시간 데이터를 보여주므로 바로 재호출
+                this.load24hChartForCurrentCoin();
+            }
+
+            startPriceUpdates() {
+                setInterval(() => {
+                    for (const coin in this.coins) {
+                        const coinData = this.coins[coin];
+                        const changePercent = (Math.random() - 0.5) * 0.5;
+                        const newPrice = coinData.price * (1 + changePercent / 100);
+                        coinData.price = Math.max(newPrice, coinData.price * 0.5);
+                        coinData.change += changePercent;
+                    }
+                    const currentCoinData = this.coins[this.currentCoin];
+                    document.getElementById('selectedCoinPrice').textContent = formatKRWFull(Math.round(currentCoinData.price));
+                    const changeEl = document.getElementById('selectedCoinChange');
+                    changeEl.textContent = `${currentCoinData.change >= 0 ? '+' : ''}${currentCoinData.change.toFixed(2)}%`;
+                    changeEl.className = `text-lg font-bold ${currentCoinData.change >= 0 ? 'text-success' : 'text-accent'}`;
+                    document.querySelectorAll('.coin-selector').forEach(btn => {
+                        const coin = btn.dataset.coin;
+                        const priceEl = btn.querySelector('.text-xs.text-text-secondary');
+                        priceEl.textContent = `${formatKRWFull(Math.round(this.coins[coin].price))}`;
+                    });
+                    this.updateDisplay();
+                    this.updateEstimatedTotal();
+                }, 2000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new TradingSimulator());
+    </script>
+
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>
